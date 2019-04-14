@@ -74,7 +74,29 @@ module.exports = (options)=>{
   function hashSM(value,nonce){
     return crypto.createHash(algS).update(value).update(nonce).digest()
   }
- 
+    
+    const keyPairFromPrivateKey = (sk)=>{
+      if(sk.length != PRIVATE_KEY_BYTES){
+      throw new Error("Invalid private key length, private key must have "+PRIVATE_KEY_BYTES+" bytes");
+      }
+      var PRIVATE = new Buffer(sk);
+      var shares = [];
+      for(var i=0;i<MIN_SHARE_COUNT;i++){
+	var share = new Buffer(CELL_SIZE_L+1);
+	share[0] = i+1;
+	PRIVATE.slice(i*CELL_SIZE_L, i*CELL_SIZE_L+CELL_SIZE_L).copy(share,1,0,CELL_SIZE_L);
+	shares.push(share);
+      }
+	var nonce = tss_1.combineRaw(shares);
+      var PUBLIC = new Buffer(PUBLIC_KEY_BYTES)
+      for(var i = 0; i < HASH_COUNT; i ++) {
+        hashSM(hashLG(PRIVATE.slice(i*CELL_SIZE_L, i*CELL_SIZE_L+CELL_SIZE_L)),nonce)
+          .copy(PUBLIC, i*CELL_SIZE_S, 0, CELL_SIZE_S)
+      }
+      return {
+        private: PRIVATE, public: PUBLIC
+      }
+    };
     const keyPairNew = (nonce)=> {
       nonce = nonce||crypto.randomBytes(CELL_SIZE_L);
       if(nonce.length != CELL_SIZE_L){
@@ -216,7 +238,16 @@ module.exports = (options)=>{
       }
     };
 return {
+ CELL_SIZE_L:CELL_SIZE_L,
+ CELL_SIZE_S:CELL_SIZE_S,
+ HASH_COUNT:HASH_COUNT,
+ MIN_SHARE_COUNT:MIN_SHARE_COUNT,
+ PRIVATE_KEY_BYTES:PRIVATE_KEY_BYTES,
+ PUBLIC_KEY_BYTES:PUBLIC_KEY_BYTES,
+ SIGNATURE_BYTES:SIGNATURE_BYTES,
+ 
  keyPairNew:keyPairNew,
+ keyPairFromPrivateKey:keyPairFromPrivateKey,
  sign:sign,
  verify:verify
 };
