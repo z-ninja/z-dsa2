@@ -1,0 +1,30 @@
+{
+  "name": "z-dsa2",
+  "version": "1.0.2",
+  "description": "Z Digital Signature 2",
+  "main": "z-dsa.js",
+  "scripts": {
+    "test": "node ./tests/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/z-ninja/z-dsa2.git"
+  },
+  "dependencies":{
+  "@stablelib/tss":">=0.7.2"
+  },
+  "keywords": [
+    "DSA",
+    "digital-signature",
+    "hash based digital signature",
+    "Shamir",
+    "Lamport",
+    "ZDSA"
+  ],
+  "author": "zninja",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/z-ninja/z-dsa2/issues"
+  },
+  "homepage": "https://github.com/z-ninja/z-dsa2#readme"
+}
