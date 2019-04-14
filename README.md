@@ -114,7 +114,7 @@ Pk[I] == HSM(S[NUM]|Nonce)
 If all parts are equal signature is valid.
 
 This way we reveal only MIN_SHARE_COUNT shares in palin text enough to recover Nonce, rest of shares are included hashed
-into signature or not incluced at all, at least 50% shares are not included in signature.
+into signature or not incluced at all, at least 50% shares are not included in signature for each configuration.
 With each new signature used by same keys, security will drop down, so you should use keys for one time signature.
 
 
