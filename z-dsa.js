@@ -94,7 +94,7 @@ module.exports = (options)=>{
           .copy(PUBLIC, i*CELL_SIZE_S, 0, CELL_SIZE_S)
       }
       return {
-        private: PRIVATE, public: PUBLIC
+        private: PRIVATE, public: PUBLIC,nonce:nonce
       }
     };
     const keyPairNew = (nonce)=> {
@@ -117,7 +117,7 @@ module.exports = (options)=>{
           .copy(PUBLIC, i*CELL_SIZE_S, 0, CELL_SIZE_S)
       }
       return {
-        private: PRIVATE, public: PUBLIC
+        private: PRIVATE, public: PUBLIC, nonce:nonce
       }
     };
     
@@ -182,20 +182,19 @@ module.exports = (options)=>{
 	  share[0] = bit+1;
 	  SIGNATURE.copy(share,1,i*CELL_SIZE_L, (i+1)*CELL_SIZE_L);
 	  shares.push(share);
-	  
 	  if(shares.length>=MIN_SHARE_COUNT)
 	    return false;
         });
 	if(shares.length<MIN_SHARE_COUNT){
 	// console.log("warning min share",shares.length);
-	  return false;
+	  return 0;
 	}
 	/// get nonce for future verification.
 	try{
 	nonce = tss_1.combineRaw(shares);
 	}catch(e){
 	  console.log(e);
-	 return false; 
+	 return 0; 
 	}
 	/// Similar to lamport verification. lamport uses bits, we use bytes, 
 	/// we added extra nonce via Shamir's secret share, that enable use of much smallar 
@@ -203,8 +202,9 @@ module.exports = (options)=>{
 	/// Lamport expose 50% of private key in first signature, we can expose minimal, depends of configuration
 	/// WARNING: same key should not be used more the once.
 	used = [];
+	var value = 0;
 	eachByte(m,HASH_COUNT, function (bit, i) {
-	  if(used.length>= MIN_SHARE_COUNT){
+	  if(used.length>= MIN_SHARE_COUNT){	   
 	  assert.deepEqual(
             hashSM(SIGNATURE.slice(i*CELL_SIZE_L, (i+1)*CELL_SIZE_L),nonce),
             PUBLIC.slice(CELL_SIZE_S*bit, CELL_SIZE_S*bit+CELL_SIZE_S),
@@ -222,6 +222,7 @@ module.exports = (options)=>{
 	    }
 	  }
 	  }
+	  value+= bit;
 	  assert.deepEqual(
             hashSM(hashLG(SIGNATURE.slice(i*CELL_SIZE_L, (i+1)*CELL_SIZE_L)),nonce),
             PUBLIC.slice(CELL_SIZE_S*bit, CELL_SIZE_S*bit+CELL_SIZE_S),
@@ -230,10 +231,11 @@ module.exports = (options)=>{
           
 	  }
         })
-	return true;
+	//console.log(used);
+	return value;
 	
       } catch (err) {
-        if(/not authentic/.test(err.message)) return false
+        if(/not authentic/.test(err.message)) return 0;
         throw err
       }
     };

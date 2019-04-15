@@ -1,6 +1,6 @@
 {
   "name": "z-dsa2",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Z-2 Digital Signature Algorithm",
   "main": "z-dsa.js",
   "scripts": {
